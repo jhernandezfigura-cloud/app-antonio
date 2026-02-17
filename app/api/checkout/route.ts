@@ -1,9 +1,8 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  apiVersion: '2025-01-27', // O la versión más reciente que te aparezca
-});
+// Inicializamos Stripe de la forma más sencilla para evitar errores de versión
+const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
 
 export async function POST() {
   try {
@@ -14,21 +13,22 @@ export async function POST() {
           price_data: {
             currency: 'mxn',
             product_data: {
-              name: 'Producto de Prueba Real', // Aquí cambias el nombre
+              name: 'Producto de Prueba Real',
               description: 'Venta de artículo desde mi app',
             },
-            unit_amount: 50000, // Equivale a $500.00 MXN (se pone en centavos)
+            unit_amount: 50000, // $500.00 MXN
           },
           quantity: 1,
         },
       ],
-      mode: 'payment', // 'payment' es para ventas únicas, 'subscription' para planes
+      mode: 'payment',
       success_url: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/success`,
       cancel_url: `${process.env.NEXT_PUBLIC_URL || 'http://localhost:3000'}/cancel`,
     });
 
     return NextResponse.json({ id: session.id });
   } catch (err: any) {
+    console.error("Error en Stripe:", err);
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }
